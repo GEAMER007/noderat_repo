@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<head>
+    <title id="ttl"></title>
+    <script src="/get_socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        var user='***USER***'
+        
+        document.getElementById('ttl').innerText=user+'\'s screen'
+        var sock=io('http://localhost:65352')
+        window.onload=()=>{
+            sock.emit('appready')
+            sock.emit('getscreenviewingcontext',user)
+            sock.on('getscreenviewingcontext_result',r=>r==0?alert('failed to get screenviewingcontext'):1)
+            sock.on('screen_frame',scr=>$('img').attr('src',"data:image/png;base64," +scr))
+        }
+    </script>
+    
+</head>
+<body style="background-color: black;">
+    <h4 style="color: green;">If the screen stops refreshing try to refresh the page</h4>
+    <img style="width: 90%; height: 90%; margin-top: 2%; margin-left: 5%"/>
+</body>
+</html>

